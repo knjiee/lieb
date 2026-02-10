@@ -29,6 +29,7 @@ const finalLoveSlide = {
 const allSlides = [...memories, finalLoveSlide];
 
 const landingScreen = document.getElementById("landingScreen");
+const landingCard = document.querySelector(".landing-card");
 const startButton = document.getElementById("startButton");
 const app = document.getElementById("app");
 
@@ -91,6 +92,19 @@ function preloadImage(src) {
     image.onerror = reject;
     image.src = src;
   });
+}
+
+async function prepareLandingIntro() {
+  if (!landingCard || !startButton) return;
+
+  // Keep flower visible for the original minimum duration.
+  const minimumFlowerDuration = wait(2200);
+  const preloadTasks = memories.map((memory) => preloadImage(memory.image));
+
+  startButton.disabled = true;
+  await Promise.all([minimumFlowerDuration, Promise.allSettled(preloadTasks)]);
+  landingCard.classList.add("intro-ready");
+  startButton.disabled = false;
 }
 
 async function renderSlide(index) {
@@ -317,3 +331,4 @@ setupSwipeNavigation();
 setupParallaxEffect();
 setupMusicControls();
 startHeartAnimation();
+prepareLandingIntro();

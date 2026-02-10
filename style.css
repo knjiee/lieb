@@ -109,8 +109,12 @@ body {
   background:
     radial-gradient(circle at 50% 45%, rgba(255, 20, 147, 0.18), transparent 42%),
     radial-gradient(circle at 50% 80%, rgba(179, 0, 0, 0.22), transparent 48%);
-  animation: introFadeOut 800ms ease 2.2s forwards;
   z-index: 2;
+}
+
+.landing-card.intro-ready .flower-intro {
+  animation: introFadeOut 800ms ease forwards;
+  pointer-events: none;
 }
 
 .flower {
@@ -202,8 +206,11 @@ body {
   width: min(100%, 48rem);
   opacity: 0;
   transform: translateY(12px);
-  animation: revealMemories 850ms ease 2.35s forwards;
   padding: 0.5rem;
+}
+
+.landing-card.intro-ready .landing-content {
+  animation: revealMemories 850ms ease 140ms forwards;
 }
 
 .landing-title {
@@ -297,14 +304,10 @@ body {
 @keyframes introFadeOut {
   0% {
     opacity: 1;
-    max-height: 10rem;
-    margin-bottom: 0.2rem;
   }
   100% {
     opacity: 0;
-    max-height: 0;
-    margin-bottom: 0;
-    overflow: hidden;
+    visibility: hidden;
   }
 }
 
