@@ -54,6 +54,8 @@ let autoPlayTimerId = null;
 const autoPlayDelayMs = 5000;
 let touchStartX = 0;
 let touchEndX = 0;
+let isSlideLoading = false;
+let renderToken = 0;
 
 function createDots() {
   dotsContainer.innerHTML = "";
@@ -76,29 +78,58 @@ function escapeHtml(text) {
   return div.innerHTML;
 }
 
-function renderSlide(index) {
+function wait(ms) {
+  return new Promise((resolve) => {
+    window.setTimeout(resolve, ms);
+  });
+}
+
+function preloadImage(src) {
+  return new Promise((resolve, reject) => {
+    const image = new Image();
+    image.onload = () => resolve(src);
+    image.onerror = reject;
+    image.src = src;
+  });
+}
+
+async function renderSlide(index) {
   const slide = allSlides[index];
   if (!slide) return;
+  const token = ++renderToken;
+  isSlideLoading = true;
 
   slideCard.classList.add("is-transitioning");
+  await wait(210);
+  if (token !== renderToken) return;
 
-  window.setTimeout(() => {
-    if (slide.isFinalMessage) {
-      slideImage.style.display = "none";
-      slideCaption.innerHTML = escapeHtml(slide.caption).replace(/\n/g, "<br />");
-      slideImageWrap.style.background =
-        "linear-gradient(145deg, rgba(179,0,0,0.15), rgba(255,20,147,0.12), rgba(0,0,0,0.45))";
-    } else {
-      slideImage.style.display = "block";
-      slideImage.src = slide.image;
-      slideImage.alt = `Memory ${index + 1}: ${slide.caption}`;
-      slideCaption.textContent = `"${slide.caption}"`;
-      slideImageWrap.style.background = "#111";
-    }
-
+  if (slide.isFinalMessage) {
+    slideImage.style.display = "none";
+    slideCaption.innerHTML = escapeHtml(slide.caption).replace(/\n/g, "<br />");
+    slideImageWrap.style.background =
+      "linear-gradient(145deg, rgba(179,0,0,0.15), rgba(255,20,147,0.12), rgba(0,0,0,0.45))";
     updateDots(index);
     slideCard.classList.remove("is-transitioning");
-  }, 210);
+    isSlideLoading = false;
+    return;
+  }
+
+  try {
+    await preloadImage(slide.image);
+  } catch (error) {
+    // Keep slideshow moving even if one image fails.
+  }
+
+  if (token !== renderToken) return;
+
+  slideImage.style.display = "block";
+  slideImage.src = slide.image;
+  slideImage.alt = `Memory ${index + 1}: ${slide.caption}`;
+  slideCaption.textContent = `"${slide.caption}"`;
+  slideImageWrap.style.background = "#111";
+  updateDots(index);
+  slideCard.classList.remove("is-transitioning");
+  isSlideLoading = false;
 }
 
 function updateDots(activeIndex) {
@@ -109,17 +140,20 @@ function updateDots(activeIndex) {
 }
 
 function goToSlide(index) {
+  if (isSlideLoading) return;
   const maxIndex = allSlides.length - 1;
   currentSlideIndex = Math.max(0, Math.min(index, maxIndex));
   renderSlide(currentSlideIndex);
 }
 
 function goToNextSlide() {
+  if (isSlideLoading) return;
   currentSlideIndex = (currentSlideIndex + 1) % allSlides.length;
   renderSlide(currentSlideIndex);
 }
 
 function goToPreviousSlide() {
+  if (isSlideLoading) return;
   currentSlideIndex = (currentSlideIndex - 1 + allSlides.length) % allSlides.length;
   renderSlide(currentSlideIndex);
 }

@@ -1723,3 +1723,102 @@ If you want it even lower, I can increase `2.2%` to `3%` or `4%`.
 
 ---
 
+_**User**_
+
+please wait to load the image before playing
+
+cause sometimes the message is nexting but not the image
+
+---
+
+_**Agent (model gpt-5.3-codex, mode Agent)**_
+
+<think><details><summary>Thought Process</summary>
+**Planning preload with load wait**</details></think>
+
+---
+
+Great catch — I’ll make slide transitions wait for each image to finish loading before advancing the caption/state, so text and image always stay in sync. I’m updating `script.js` now.
+
+---
+
+<tool-use data-tool-type="read" data-tool-name="read_file_v2">
+<details><summary>Tool use: **read_file_v2** • Read file: c:/Users/Admin/OneDrive/Desktop/automation ko/valentines/script.js</summary>
+
+</details>
+</tool-use>
+
+---
+
+<think><details><summary>Thought Process</summary>
+**Designing async slide rendering**</details></think>
+
+---
+
+<tool-use data-tool-type="write" data-tool-name="edit_file_v2">
+
+<details><summary>Tool use: **edit_file_v2** • Edit file: c:/Users/Admin/OneDrive/Desktop/automation ko/valentines/script.js</summary>
+
+</details>
+
+</tool-use>
+
+---
+
+<think><details><summary>Thought Process</summary>
+**Assessing slide loading state handling**</details></think>
+
+---
+
+<tool-use data-tool-type="unknown" data-tool-name="read_lints">
+<details>
+<summary>Tool use: **read_lints**</summary>
+
+
+Parameters:
+
+```json
+{
+  "paths": [
+    "c:/Users/Admin/OneDrive/Desktop/automation ko/valentines/script.js"
+  ]
+}
+```
+Result:
+
+```json
+{
+  "linterErrorsByFile": [
+    {
+      "relativeWorkspacePath": "c:/Users/Admin/OneDrive/Desktop/automation ko/valentines/script.js"
+    }
+  ]
+}
+```
+Status: **completed**
+
+
+</details>
+</tool-use>
+
+---
+
+Implemented — slideshow now waits for image load before updating the slide content.
+
+### What I changed in `script.js`
+
+- Added an image preloader (`preloadImage`) and async slide rendering
+- `renderSlide()` now:
+  - waits for transition delay
+  - waits for the target image to load
+  - then updates both image + caption together
+- Added `isSlideLoading` guard so next/prev/auto won’t advance while a slide is still loading
+- Added `renderToken` to prevent race conditions when rapid navigation happens
+
+### Result
+
+No more “caption/message changed but image still old” mismatch.  
+Image and text now switch in sync, even when images load slowly.
+
+---
+
